@@ -1,7 +1,9 @@
 var async = require('async'),
 	microtime = require('microtime'),
 	bunyan = require('bunyan'),
-	usage = require('usage');
+	usage = require('usage'),
+	child_process = require('child_process'),
+	spawn = child_process.spawn;
 
 var benchtest = require('./' + process.argv[2]);
 
@@ -10,34 +12,45 @@ var pid = process.pid;
 var log = bunyan.createLogger({name: 'SockBench'});
 
 var options = { keepHistory: true };
-// setInterval(function() {
-// 	usage.lookup(pid, function(err, result) {
-// 		log.info(result, 'stat');
-// 	});
-// }, 500);
+setInterval(function() {
+	usage.lookup(pid, function(err, result) {
+		log.info(result, 'stat');
+	});
+}, 500);
 
 
 var PORT = 3000;
 benchtest.prepareServer(PORT);
 
 function performTest(sockets, messages, endCallback){
-	var failed = 0;
-	var q = async.queue(function(task, callback){
-		benchtest.test(messages, function(success){
-			if(success === false){
-				failed++;
-			}
-			callback();
-		});
-	}, sockets);
-
-	for(var i=0; i<sockets; ++i){
-		q.push();
-	}
-
-	q.drain = function() {
-		endCallback(failed);
-	}
+	var clientRunner = spawn('node', ['client.js', process.argv[2], process.argv[3], PORT, sockets, messages]);
+	var time;
+	var interval;
+	var failed;
+	var lost;
+	clientRunner.stdout.on('data', function (data) {
+		data = JSON.parse(data);
+		if(data.message === 'start'){
+			time = microtime.nowDouble();
+		}
+	});
+	clientRunner.stdout.on('data', function (data) {
+		data = JSON.parse(data);
+		if(data.message === 'start'){
+			time = microtime.nowDouble();
+		}
+		else{
+			interval = microtime.nowDouble()-time;
+			failed = data.failed;
+			lost = data.lost;
+		}
+	});
+	clientRunner.on('exit', function(){
+		endCallback(interval, failed, lost);
+	});
+	clientRunner.stderr.on('data', function (data) {
+		log.error(data.toString());
+	});
 }
 
 var testFunctions = [];
@@ -55,9 +68,8 @@ for(var i=0; i<messages.length; ++i){
 	for(var j=0; j<sockets.length; ++j){
 		(function(tests, conc){
 			testFunctions.push(function(callback){
-				var time = microtime.nowDouble();
-				performTest(sockets[conc], messages[tests], function(failed){
-					log.info({interval:(microtime.nowDouble()-time), messages:messages[tests], failed: failed, sockets:sockets[conc]}, 'messages');
+				performTest(sockets[conc], messages[tests], function(time, failed, lostMessages){
+					log.info({interval:time, messages:messages[tests], lost:lostMessages, failedsockets: failed, sockets:sockets[conc]}, 'messages');
 					callback();
 				});
 			});

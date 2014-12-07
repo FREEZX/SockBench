@@ -13,6 +13,10 @@ exports.prepareServer = function(port){
 	});
 }
 
+exports.prepareClient = function(port){
+	PORT = port;
+}
+
 exports.test = function(messages, callback){
 	var socket;
 	socket = engineClient('ws://127.0.0.1:'+PORT);

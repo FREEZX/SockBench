@@ -21,6 +21,10 @@ exports.prepareServer = function(port) {
 	server.listen(PORT, '0.0.0.0');
 }
 
+exports.prepareClient = function(port){
+	PORT = port;
+}
+
 exports.test = function(messages, callback){
 	var sock = new sockjsClient('http://127.0.0.1:'+PORT+'/echo');
 	

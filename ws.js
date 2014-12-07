@@ -17,6 +17,10 @@ exports.prepareServer = function(port){
 	server.listen(PORT);
 }
 
+exports.prepareClient = function(port){
+	PORT = port;
+}
+
 exports.test = function(messages, callback){
 	var socket;
 	var retryInterval;

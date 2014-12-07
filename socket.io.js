@@ -16,18 +16,34 @@ exports.prepareServer = function(port){
 	});
 }
 
+exports.prepareClient = function(port){
+	PORT = port;
+}
+
 exports.test = function(messages, callback){
 	var socket;
 	var retryInterval;
 	var cbCalled = false;
 	socket = ioClient.connect('http://127.0.0.1:'+PORT, {'force new connection': true, 'try multiple transports': false, 'reconnect': false});
-	var returnedMessages = 0;
+	var responses = 0;
+	
 	var socketTimeout;
 
-	socket.on('data', function(e){
-		if(++returnedMessages === messages){
-			clearTimeout(socketTimeout);
+	var callCallback = function(){
+		if(!cbCalled){
+			callback(messages - responses);
+			cbCalled = true;
 			socket.disconnect();
+		}
+	}
+
+	socket.on('data', function(e){
+		clearTimeout(socketTimeout);
+		if(++responses === messages){
+			socket.disconnect();
+		}
+		else{
+			socketTimeout = setTimeout(callCallback, 30000);
 		}
 	});
 
@@ -38,18 +54,9 @@ exports.test = function(messages, callback){
 	});
 
 	socket.on('disconnect', function(){
-		if(!cbCalled){
-			callback();
-			cbCalled = true;
-		}
+		callCallback();
 	});
 
 	//Fallback if socket.io loses the connection or doesn't connect properly
-	socketTimeout = setTimeout(function(){
-		if(!cbCalled){
-			callback(false);
-			cbCalled = true;
-			socket.disconnect();
-		}
-	}, 100000);
+	socketTimeout = setTimeout(callCallback, 30000);
 }
