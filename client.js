@@ -1,7 +1,7 @@
 var async = require('async');
 
 var benchtest = require('./' + process.argv[2]);
-benchtest.prepareClient(parseInt(process.argv[4]), process.argv[3] === undefined ? process.argv[3] : 'websockets');
+benchtest.prepareClient(parseInt(process.argv[4]), process.argv[3]);
 console.log(JSON.stringify({message: 'start'}));
 
 var sockets = parseInt(process.argv[5]);

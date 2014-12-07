@@ -12,7 +12,7 @@
     "grunt": "^0.4.5",
     "grunt-exec": "^0.4.6",
     "microtime": "*",
-    "primus": "^2.4.12",
+    "primus": "primus/primus#sockjs-client-1.0",
     "socket.io": "^0.9.17",
     "socket.io-client": "^0.9.17",
     "sockjs": "^0.3.11",

@@ -12,11 +12,11 @@ var pid = process.pid;
 var log = bunyan.createLogger({name: 'SockBench'});
 
 var options = { keepHistory: true };
-setInterval(function() {
-	usage.lookup(pid, function(err, result) {
-		log.info(result, 'stat');
-	});
-}, 500);
+// setInterval(function() {
+// 	usage.lookup(pid, function(err, result) {
+// 		log.info(result, 'stat');
+// 	});
+// }, 500);
 
 
 var PORT = 3000;
@@ -49,7 +49,7 @@ function performTest(sockets, messages, endCallback){
 		endCallback(interval, failed, lost);
 	});
 	clientRunner.stderr.on('data', function (data) {
-		log.error(data.toString());
+		console.error(data.toString());
 	});
 }
 

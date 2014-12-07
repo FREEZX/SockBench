@@ -6,15 +6,11 @@ var server, primus, Socket, PORT;
 exports.prepareServer = function(port){
 	PORT = port;
 	server = http.createServer();
-	primus = new Primus(server, { transformer: process.argv[3], ping: false, pong: false, timeout: false, strategy: false });
+	primus = new Primus(server, { transformer: process.argv[3] });
 
 	primus.on('connection', function(socket){
 		socket.on('data', function(message){
 			socket.write(message);
-		});
-
-		socket.on('error', function(err){
-			console.log('ERROR!');
 		});
 	});
 
@@ -23,12 +19,12 @@ exports.prepareServer = function(port){
 
 exports.prepareClient = function(port, transformer){
 	PORT = port;
-	Socket = Primus.createSocket({ transformer: transformer, ping: false, pong: false, timeout: false, strategy: false });
+	Socket = Primus.createSocket({ transformer: transformer });
 }
 
 exports.test = function(messages, callback){
 	var cbCalled = false;
-	var client = new Socket('http://localhost:'+PORT);
+	var client;
 	var responses = 0;
 	var socketTimeout;
 
@@ -36,30 +32,40 @@ exports.test = function(messages, callback){
 		if(!cbCalled){
 			callback(messages - responses);
 			cbCalled = true;
-			client.end();
+			client = undefined;
+			return;
 		}
+		client.end();
 	}
 
-	client.on('open', function(){
-		for(var i=0; i<messages; ++i){
-			client.write('data');
-		}
-	});
+	var url = 'http://localhost:'+PORT;
 
-	client.on('data', function(){
-		clearTimeout(socketTimeout);
-		if(++responses === messages){
-			client.end();
-		}
-		else{
-			socketTimeout = setTimeout(callCallback, 30000);
-		}
-	});
+	var connect = function(){
+		client = new Socket(url);
 
-	client.on('end', function(){
-		callCallback();
-	});
+		client.on('open', function(){
+			for(var i=0; i<messages-responses; ++i){
+				client.write('data');
+			}
+		});
+
+		client.on('data', function(){
+			if(++responses === messages){
+				client.end();
+			}
+		});
+
+		client.on('end', function(){
+			if(messages === responses){
+				callCallback();
+			}
+			else{
+				connect();
+			}
+		});
+	}
+	connect();
 
 	//Fallback if primus loses the connection or doesn't connect properly
-	socketTimeout = setTimeout(callCallback, 30000);
+	// socketTimeout = setTimeout(callCallback, 5000);
 }
