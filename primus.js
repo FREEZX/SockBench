@@ -26,15 +26,9 @@ exports.test = function(messages, callback){
 	var cbCalled = false;
 	var client;
 	var responses = 0;
-	var socketTimeout;
 
 	var callCallback = function(){
-		if(!cbCalled){
-			callback(messages - responses);
-			cbCalled = true;
-			client = undefined;
-			return;
-		}
+		callback();
 		client.end();
 	}
 
@@ -65,7 +59,4 @@ exports.test = function(messages, callback){
 		});
 	}
 	connect();
-
-	//Fallback if primus loses the connection or doesn't connect properly
-	// socketTimeout = setTimeout(callCallback, 5000);
 }

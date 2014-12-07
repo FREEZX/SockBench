@@ -2,6 +2,10 @@
   "name": "socketbench-ws",
   "version": "1.0.0",
   "author": "Kristijan Trajkovski <kiko_trajkovski@hotmail.com>",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/FREEZX/SockBench.git"
+  },
   "dependencies": {
     "async": "*",
     "browserchannel": "1.0.6",
