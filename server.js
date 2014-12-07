@@ -10,20 +10,25 @@ var pid = process.pid;
 var log = bunyan.createLogger({name: 'SockBench'});
 
 var options = { keepHistory: true };
-setInterval(function() {
-	usage.lookup(pid, function(err, result) {
-		log.info(result, 'stat');
-	});
-}, 500);
+// setInterval(function() {
+// 	usage.lookup(pid, function(err, result) {
+// 		log.info(result, 'stat');
+// 	});
+// }, 500);
 
 
 var PORT = 3000;
 benchtest.prepareServer(PORT);
 
 function performTest(sockets, messages, endCallback){
-	var testsDone = 0;
+	var failed = 0;
 	var q = async.queue(function(task, callback){
-		benchtest.test(messages, callback);
+		benchtest.test(messages, function(success){
+			if(success === false){
+				failed++;
+			}
+			callback();
+		});
 	}, sockets);
 
 	for(var i=0; i<sockets; ++i){
@@ -31,7 +36,7 @@ function performTest(sockets, messages, endCallback){
 	}
 
 	q.drain = function() {
-		endCallback();
+		endCallback(failed);
 	}
 }
 
@@ -51,8 +56,8 @@ for(var i=0; i<messages.length; ++i){
 		(function(tests, conc){
 			testFunctions.push(function(callback){
 				var time = microtime.nowDouble();
-				performTest(sockets[conc], messages[tests], function(){
-					log.info({interval:(microtime.nowDouble()-time), messages:messages[tests], sockets:sockets[conc]}, 'messages');
+				performTest(sockets[conc], messages[tests], function(failed){
+					log.info({interval:(microtime.nowDouble()-time), messages:messages[tests], failed: failed, sockets:sockets[conc]}, 'messages');
 					callback();
 				});
 			});

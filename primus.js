@@ -6,7 +6,7 @@ var server, primus, Socket, PORT;
 exports.prepareServer = function(port){
 	PORT = port;
 	server = http.createServer();
-	primus = new Primus(server, { transformer: process.argv[3] });
+	primus = new Primus(server, { transformer: process.argv[3], ping: false, pong: false, timeout: false, strategy: false });
 
 	Socket = primus.Socket;
 
@@ -20,6 +20,7 @@ exports.prepareServer = function(port){
 }
 
 exports.test = function(messages, callback){
+	var cbCalled = false;
 	var client = new Socket('http://localhost:'+PORT);
 	var responses = 0;
 
@@ -37,6 +38,18 @@ exports.test = function(messages, callback){
 	});
 
 	client.on('end', function(){
-		callback();
+		if(!cbCalled){
+			callback();
+			cbCalled = true;
+		}
 	});
+
+	//Fallback if primus loses the connection or doesn't connect properly
+	socketTimeout = setTimeout(function(){
+		if(!cbCalled){
+			callback(false);
+			cbCalled = true;
+			client.end();
+		}
+	}, 30000);
 }

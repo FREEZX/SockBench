@@ -40,15 +40,16 @@ exports.test = function(messages, callback){
 	socket.on('disconnect', function(){
 		if(!cbCalled){
 			callback();
+			cbCalled = true;
 		}
-		cbCalled = true;
 	});
 
 	//Fallback if socket.io loses the connection or doesn't connect properly
 	socketTimeout = setTimeout(function(){
 		if(!cbCalled){
-			callback();
+			callback(false);
+			cbCalled = true;
+			socket.disconnect();
 		}
-		cbCalled = true;
-	}, 10000);
+	}, 100000);
 }
