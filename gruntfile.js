@@ -21,6 +21,9 @@ module.exports = function(grunt) {
 			sockjs: {
 				cmd: 'node server.js sockjs > results/sockjs.json 2> results/sockjs.err'
 			},
+			// browserchannel: {
+			// 	cmd: 'node server.js browserchannel > results/browserchannel.json 2> results/browserchannel.err'
+			// },
 			primus_ws: {
 				cmd: 'node server.js primus websockets > results/primus_ws.json 2> results/primus_ws.err'
 			},

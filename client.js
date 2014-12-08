@@ -7,23 +7,17 @@ console.log(JSON.stringify({message: 'start'}));
 var sockets = parseInt(process.argv[5]);
 var messages = parseInt(process.argv[6]);
 
-var failed = 0;
-var lostMessages = 0;
 var q = async.queue(function(task, callback){
-	benchtest.test(messages, function(lost){
-		lostMessages += (lost || 0);
-		if(lost>0){
-			++failed;
-		}
+	benchtest.test(messages, function(){
 		callback();
 	});
-}, sockets);
+}, 50);
 
 for(var i=0; i<sockets; ++i){
 	q.push();
 }
 
 q.drain = function() {
-	console.log(JSON.stringify({failed: failed, lost: lostMessages, message: 'end'}));
+	console.log(JSON.stringify({message: 'end'}));
 	process.exit();
 }

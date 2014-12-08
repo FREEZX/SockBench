@@ -3,13 +3,14 @@
   "version": "1.0.0",
   "author": "Kristijan Trajkovski <kiko_trajkovski@hotmail.com>",
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/FREEZX/SockBench.git"
+    "type": "git",
+    "url": "https://github.com/FREEZX/SockBench.git"
   },
   "dependencies": {
     "async": "*",
     "browserchannel": "1.0.6",
     "bunyan": "^1.2.3",
+    "connect": "^3.3.3",
     "engine.io": "^1.4.3",
     "engine.io-client": "^1.4.3",
     "faye-websocket": "^0.8.1",

@@ -31,7 +31,7 @@ exports.test = function(messages, callback){
 
 	var callCallback = function(){
 		if(!cbCalled){
-			callback(messages - responses);
+			callback();
 			cbCalled = true;
 			socket = undefined;
 			return;
