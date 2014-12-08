@@ -38,10 +38,10 @@ module.exports = function(grunt) {
 			},
 			primus_faye: {
 				cmd: 'node server.js primus faye > '+results+'/primus_faye.json 2> '+results+'/primus_faye.err'
-			},
-			primus_browserchannel: {
-				cmd: 'node server.js primus browserchannel > '+results+'/primus_browserchannel.json 2> '+results+'/primus_browserchannel.err'
-			}
+			}//,
+			// primus_browserchannel: {
+			// 	cmd: 'node server.js primus browserchannel > '+results+'/primus_browserchannel.json 2> '+results+'/primus_browserchannel.err'
+			// }
 		}
 	});
 
