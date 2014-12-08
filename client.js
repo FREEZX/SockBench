@@ -8,9 +8,7 @@ var sockets = parseInt(process.argv[5]);
 var messages = parseInt(process.argv[6]);
 
 var q = async.queue(function(task, callback){
-	benchtest.test(messages, function(){
-		callback();
-	});
+	benchtest.test(messages, callback);
 }, 50);
 
 for(var i=0; i<sockets; ++i){
@@ -19,5 +17,4 @@ for(var i=0; i<sockets; ++i){
 
 q.drain = function() {
 	console.log(JSON.stringify({message: 'end'}));
-	process.exit();
 }

@@ -20,7 +20,7 @@ setInterval(function() {
 
 
 var PORT = 3000;
-benchtest.prepareServer(PORT);
+benchtest.prepareServer(PORT, process.argv[3]);
 
 function performTest(sockets, messages, endCallback){
 	var clientRunner = spawn('node', ['client.js', process.argv[2], process.argv[3], PORT, sockets, messages]);

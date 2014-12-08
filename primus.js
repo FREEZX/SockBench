@@ -23,14 +23,8 @@ exports.prepareClient = function(port, transformer){
 }
 
 exports.test = function(messages, callback){
-	var cbCalled = false;
 	var client;
 	var responses = 0;
-
-	var callCallback = function(){
-		callback();
-		client.end();
-	}
 
 	var url = 'http://localhost:'+PORT;
 
@@ -51,7 +45,7 @@ exports.test = function(messages, callback){
 
 		client.on('end', function(){
 			if(messages === responses){
-				callCallback();
+				callback();
 			}
 			else{
 				connect();
