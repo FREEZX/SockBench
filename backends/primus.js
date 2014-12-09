@@ -13,6 +13,13 @@ exports.prepareServer = function(port){
 			socket.write(message);
 		});
 	});
+	
+	primus.remove('cors');
+	primus.remove('primus.js');
+	primus.remove('spec');
+	primus.remove('authorization');
+	primus.remove('no-cache');
+	primus.remove('x-xss');
 
 	server.listen(PORT);
 }

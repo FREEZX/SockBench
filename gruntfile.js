@@ -38,6 +38,9 @@ module.exports = function(grunt) {
 			},
 			primus_faye: {
 				cmd: 'node server.js primus faye > '+results+'/primus_faye.json 2> '+results+'/primus_faye.err'
+			},
+			render: {
+				cmd: 'node render.js'
 			}//,
 			// primus_browserchannel: {
 			// 	cmd: 'node server.js primus browserchannel > '+results+'/primus_browserchannel.json 2> '+results+'/primus_browserchannel.err'
@@ -45,14 +48,20 @@ module.exports = function(grunt) {
 		}
 	});
 
-	grunt.registerTask('default', 'executes all benchmarks', function () {
+	grunt.registerTask('default', 'executes all benchmarks and renders', function () {
 		var tasks = ['exec'];
 		grunt.option('force', true);
 		grunt.task.run(tasks);
 	});
 
 	grunt.registerTask('primus', function () {
-		var tasks = ['exec:primus_ws', 'exec:primus_engineio', 'exec:primus_faye', 'exec:primus_browserchannel', 'exec:primus_sockjs', 'exec:primus_socketio'];
+		var tasks = ['exec:primus_ws', 'exec:primus_engineio', 'exec:primus_faye', 'exec:primus_sockjs', 'exec:primus_socketio'];
+		grunt.option('force', true);
+		grunt.task.run(tasks);
+	});
+
+	grunt.registerTask('render', function () {
+		var tasks = ['exec:render'];
 		grunt.option('force', true);
 		grunt.task.run(tasks);
 	});
