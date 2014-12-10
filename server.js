@@ -64,7 +64,7 @@ function performTest(sockets, messages, endCallback){
 
 var testFunctions = [];
 
-sockets = [1, 10, 100, 1000, 10000, 100000];
+sockets = [1, 25000, 50000, 75000, 100000];
 messages = [1, 100];
 
 testFunctions.push(function(callback){

@@ -6,8 +6,7 @@ var _ = require('lodash'),
 	os = require('os');
 
 var results = [];
-var stats = [];
-var template, minmaxtemplate;
+var template, minmaxtemplate, memtemplate;
 var i, j;
 
 async.series([
@@ -23,11 +22,14 @@ async.series([
 							data = data.toString();
 							data = data.substr(0, data.length-1);
 							var parts = data.split("\n");
-							var currentResult = {name: (JSON.parse(parts[0])).name, data: []};
+							var currentResult = {name: (JSON.parse(parts[0])).name, data: [], stats: []};
 							for(j=0;j<parts.length;++j){
 								parts[j] = JSON.parse(parts[j]);
 								if(parts[j].msg === 'messages'){
 									currentResult.data.push(parts[j]);
+								}
+								else if(parts[j].msg === 'stat'){
+									currentResult.stats.push(parts[j]);
 								}
 							}
 							results.push(currentResult);
@@ -48,6 +50,12 @@ async.series([
 					done();
 				});
 			});
+			functions.push(function(done){
+				fs.readFile('memchart.ejs', 'utf8', function(err, data){
+					memtemplate = data;
+					done();
+				});
+			});
 			async.series(functions, function(){
 				done();
 			});
@@ -61,8 +69,12 @@ async.series([
 		var maxTimes = {};
 		var meanTimes = {};
 
+		var stats = {};
+
 		for(var i=0; i<results.length; ++i){
 			var resultData = results[i].data;
+			var resultStats = results[i].stats;
+
 			for(var j=0; j<resultData.length; ++j){
 				if(!groupedNumMsgs[resultData[j].messages]){
 					groupedNumMsgs[resultData[j].messages] = {};
@@ -85,7 +97,11 @@ async.series([
 				minTimes[resultData[j].messages][results[i].name][resultData[j].sockets] = Math.min(minTimes[resultData[j].messages][results[i].name][resultData[j].sockets] || Infinity, resultData[j].interval);
 				maxTimes[resultData[j].messages][results[i].name][resultData[j].sockets] = Math.max(maxTimes[resultData[j].messages][results[i].name][resultData[j].sockets] || 0, resultData[j].interval);
 				meanTimes[resultData[j].messages][results[i].name][resultData[j].sockets] += resultData[j].interval;
+			}
 
+			stats[results[i].name] = [];
+			for(var j=0; j<resultStats.length; ++j){
+				stats[results[i].name].push(resultStats[j]);
 			}
 		}
 
@@ -117,6 +133,7 @@ async.series([
 				}
 				var currentObj = {
 					name: keys[j],
+					lineWidth: 1,
 					data: mapped
 				}
 				// console.log(currentObj);
@@ -126,6 +143,27 @@ async.series([
 			var renderRes = ejs.render(template, { messages: msgNums[i], results: remapped, os: [os.type(), os.platform(), os.arch(), os.release()].join(' ')});
 			fs.writeFileSync('./renders/'+msgNums[i]+'.html', renderRes);
 		}
+
+		var statKeys = Object.keys(stats);
+
+		//Render full mem charts
+		var remapped = [];
+		for(var i=0; i<statKeys.length; ++i){
+			var mapped = [];
+			for(var j=0; j<stats[statKeys[i]].length; ++j){
+				mapped.push(stats[statKeys[i]][j].mem.rss);
+			}
+			var rem = {
+				name: statKeys[i],
+				pointInterval: 500,
+				data: mapped,
+				lineWidth: 1,
+				opacity: 0.6
+			};
+			remapped.push(rem);
+		}
+		var renderRes = ejs.render(memtemplate, { results: remapped, os: [os.type(), os.platform(), os.arch(), os.release()].join(' ')});
+		fs.writeFileSync('./renders/mem_100.html', renderRes);
 
 		//Render charts for each socket type, with min and max vals
 		for(var i=0; i<msgNums.length; ++i){
@@ -149,6 +187,7 @@ async.series([
 				var currentObjMean = {
 					name: keys[j],
 					data: mean,
+					lineWidth: 1,
 					zIndex: 1
 				}
 				var minmaxObj = {

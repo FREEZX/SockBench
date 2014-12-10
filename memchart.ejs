@@ -10,19 +10,20 @@
 <div id="container" style="width:100%; height:100%;"></div>
 <script>
 $(function () {
-  Highcharts.setOptions({colors: ['rgb(166,206,227)','rgb(31,120,180)','rgb(178,223,138)','rgb(51,160,44)','rgb(251,154,153)','rgb(227,26,28)','rgb(253,191,111)','rgb(255,127,0)','rgb(202,178,214)','rgb(106,61,154)']});
+	Highcharts.setOptions({colors: ['rgb(166,206,227)','rgb(31,120,180)','rgb(178,223,138)','rgb(51,160,44)','rgb(251,154,153)','rgb(227,26,28)','rgb(253,191,111)','rgb(255,127,0)','rgb(202,178,214)','rgb(106,61,154)']});
   $('#container').highcharts({
     chart: {
         type: 'line',
-        zoomType: 'y'
+        zoomType: 'xy'
     },
     title: {
-        text: '<%= messages %> message(s) per socket (lower is better)'
+        text: '100 message(s) per socket (lower is better)'
     },
     subtitle: {
         text: '<%= os %>'
     },
     xAxis: {
+    	type: 'datetime',
         title: {
           text:'Number of sockets'
         }
@@ -32,7 +33,7 @@ $(function () {
             text: 'Time(seconds)'
         }
     },
-    series: [<%- JSON.stringify(mean) %>, <%- JSON.stringify(range) %>]
+    series: <%- JSON.stringify(results) %>
  });
 });
 </script>

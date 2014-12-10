@@ -9,7 +9,7 @@ var messages = parseInt(process.argv[6]);
 
 var q = async.queue(function(task, callback){
 	benchtest.test(messages, callback);
-}, 50);
+}, sockets);
 
 for(var i=0; i<sockets; ++i){
 	q.push();
